@@ -28,6 +28,12 @@ def get_flights_data(source: str, destination: str, date: str, is_flights_direct
     If no source/destination airport was provided, then select the most used airport in the country.
     If no date was specified, just make the query date tomorrow.
 
+    The Rating Weights defines the relative importance of various flight attributes, it also allows customization of how different flight attributes influence the final rating. For instance, if the user values lower prices above all else, the `priceWeight` will have a higher value, making cheaper flights more favorable in the final sorted results.
+
+    The lower the rating of a flight, the better it is.
+
+    Return the list of flights in this format f'{index from 1 to length of flights}- ({flight_info['airline']}, {flight_info['flight_number']}) Price: {flight_info['price']}, Departure: {flight_info['departure']}, Arrival: {flight_info['arrival']}\n'
+
     Args:
         source: IATA code for the source airport (e.g., "JFK").
         destination: IATA code for the destination airport (e.g., "LAX").
@@ -35,19 +41,58 @@ def get_flights_data(source: str, destination: str, date: str, is_flights_direct
         is_flights_direct: If set to true, only flights going from the origin to the destination with no stop in between will be returned (Direct), default value is False
         currency: The preferred currency for the flight offers. Currency is specified in the ISO 4217 format, e.g. EUR for Euro, default is USD
 
-        The Rating Weights defines the relative importance of various flight attributes, it also allows customization of how different flight attributes influence the final rating. For instance, if the user values lower prices above all else, the `priceWeight` will have a higher value, making cheaper flights more favorable in the final sorted results. The attributes include:
+        The Rating Weights attributes include:
         price_weight: Determines the importance of the flight price in the rating. Higher values prioritize cheaper flights.
         duration_weight: Determines the weight of the flight duration in the rating. Longer flights are penalized more with higher values.
         late_arrival_weight: Defines the penalty for late arrivals. Higher values mean a greater penalty for flights arriving late.
         early_departure_weight: Determines the penalty for early departures. Higher values penalize flights departing earlier than scheduled.
         non_direct_flight_weight: Controls the penalty for non-direct flights. Higher values penalize flights with layovers more heavily.
 
-        The lower the rating of a flight, the better it is.
-
     Returns:
         list: A list of flight data dictionaries, each containing flight details (price, departure/arrival times, airline,
               flight number, and rating). The flights are sorted by rating (lowest rating first).
     """
+
+    class RatingWeights:
+        def __init__(self, price_weight: int = 0, duration_weight: int = 0, late_arrival_weight: int = 0,
+                     early_departure_weight: int = 0, non_direct_flight_weight: int = 0):
+            # Rating parameters (weights ranges from 0 to 5)
+            self.priceWeight = price_weight  # Higher weight for price
+            self.durationWeight = duration_weight  # Moderate weight for duration
+            self.lateArrivalWeight = late_arrival_weight  # Weight for late arrival
+            self.earlyDepartureWeight = early_departure_weight  # Weight for early departure
+            self.nonDirectFlightWeight = non_direct_flight_weight  # Weight for a non-direct flight
+
+            self._correct_weights()
+
+            self._normalize_weights()
+
+        def _correct_weights(self):
+            self.minValue = 0
+            self.maxValue = 5
+
+            # Correct any weight that is out of bounds to be between 0 and 5
+            self.priceWeight = max(self.minValue, min(self.priceWeight, self.maxValue))
+            self.durationWeight = max(self.minValue, min(self.durationWeight, self.maxValue))
+            self.lateArrivalWeight = max(self.minValue, min(self.lateArrivalWeight, self.maxValue))
+            self.earlyDepartureWeight = max(self.minValue, min(self.earlyDepartureWeight, self.maxValue))
+            self.nonDirectFlightWeight = max(self.minValue, min(self.nonDirectFlightWeight, self.maxValue))
+
+        def _normalize_weights(self):
+            # Calculate the sum of all weights
+            weights_sum = self.priceWeight + self.durationWeight + self.lateArrivalWeight + self.earlyDepartureWeight + self.nonDirectFlightWeight
+
+            # Check if the total weight is not zero to avoid division by zero
+            if weights_sum != 0:
+                # Normalize the weights by dividing each one by the total weight
+                self.priceWeight /= weights_sum
+                self.durationWeight /= weights_sum
+                self.lateArrivalWeight /= weights_sum
+                self.earlyDepartureWeight /= weights_sum
+                self.nonDirectFlightWeight /= weights_sum
+            else:
+                print("Warning: The sum of the weights is zero. Cannot normalize.")
+
     try:
         # Search for flights
         response = amadeus.shopping.flight_offers_search.get(
@@ -59,46 +104,6 @@ def get_flights_data(source: str, destination: str, date: str, is_flights_direct
             # nonStop=is_flights_direct,
             max=20,
         )
-
-        class RatingWeights:
-            def __init__(self, price_weight: int = 0, duration_weight: int = 0, late_arrival_weight: int = 0,
-                         early_departure_weight: int = 0, non_direct_flight_weight: int = 0):
-                # Rating parameters (weights ranges from 0 to 5)
-                self.priceWeight = price_weight  # Higher weight for price
-                self.durationWeight = duration_weight  # Moderate weight for duration
-                self.lateArrivalWeight = late_arrival_weight  # Weight for late arrival
-                self.earlyDepartureWeight = early_departure_weight  # Weight for early departure
-                self.nonDirectFlightWeight = non_direct_flight_weight  # Weight for a non-direct flight
-
-                self._correct_weights()
-
-                self._normalize_weights()
-
-            def _correct_weights(self):
-                self.minValue = 0
-                self.maxValue = 5
-
-                # Correct any weight that is out of bounds to be between 0 and 5
-                self.priceWeight = max(self.minValue, min(self.priceWeight, self.maxValue))
-                self.durationWeight = max(self.minValue, min(self.durationWeight, self.maxValue))
-                self.lateArrivalWeight = max(self.minValue, min(self.lateArrivalWeight, self.maxValue))
-                self.earlyDepartureWeight = max(self.minValue, min(self.earlyDepartureWeight, self.maxValue))
-                self.nonDirectFlightWeight = max(self.minValue, min(self.nonDirectFlightWeight, self.maxValue))
-
-            def _normalize_weights(self):
-                # Calculate the sum of all weights
-                weights_sum = self.priceWeight + self.durationWeight + self.lateArrivalWeight + self.earlyDepartureWeight + self.nonDirectFlightWeight
-
-                # Check if the total weight is not zero to avoid division by zero
-                if weights_sum != 0:
-                    # Normalize the weights by dividing each one by the total weight
-                    self.priceWeight /= weights_sum
-                    self.durationWeight /= weights_sum
-                    self.lateArrivalWeight /= weights_sum
-                    self.earlyDepartureWeight /= weights_sum
-                    self.nonDirectFlightWeight /= weights_sum
-                else:
-                    print("Warning: The sum of the weights is zero. Cannot normalize.")
 
         rating_weights = RatingWeights(
             price_weight=price_weight,
@@ -142,11 +147,11 @@ def get_flights_data(source: str, destination: str, date: str, is_flights_direct
 
         # Parse the response and calculate ratings
         flights = []
-        for flight in response.data:
+        for index, flight in enumerate(response.data):
             flight_info = {
                 "price": flight['price']['total'],
-                "departure": flight['itineraries'][0]['segments'][0]['departure']['at'],
-                "arrival": flight['itineraries'][0]['segments'][-1]['arrival']['at'],
+                "departure": datetime.fromisoformat(flight['itineraries'][0]['segments'][0]['departure']['at']).strftime("%d/%m/%Y %H:%M"),
+                "arrival": datetime.fromisoformat(flight['itineraries'][0]['segments'][-1]['arrival']['at']).strftime("%d/%m/%Y %H:%M"),
                 "airline": flight['itineraries'][0]['segments'][0]['carrierCode'],
                 "flight_number": flight['itineraries'][0]['segments'][0]['number'],
                 "rating": calculate_rating(flight)  # Add rating
@@ -215,4 +220,4 @@ agent = CodeAgent(
 GradioUI(agent).launch()
 
 # Prompt #1: List flights from Egypt airport to Germany airport, 1st of March 2025
-# Prompt #2: List flights from Egypt airport to London airport, 1st of March 2025, make the price weight 5, duration weight 3, late arrival weight 5, non_direct weight 2
+# Prompt #2: List flights from Egypt airport to London airport, 1st of March 2025, make the price weight 5, duration weight 3, late arrival weight 5, non-direct weight 2
