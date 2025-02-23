@@ -11,6 +11,10 @@ from Gradio_UI import GradioUI
 
 from amadeus import Client, ResponseError
 
+from dotenv import load_dotenv
+
+
+load_dotenv(dotenv_path='creds.env')
 
 # Initialize the Amadeus client
 amadeus = Client(
@@ -32,7 +36,7 @@ def get_flights_data(source: str, destination: str, date: str, is_flights_direct
 
     The lower the rating of a flight, the better it is.
 
-    Return the list of flights in this format f'{index from 1 to length of flights}- ({flight_info['airline']}, {flight_info['flight_number']}) Price: {flight_info['price']}, Departure: {flight_info['departure']}, Arrival: {flight_info['arrival']}\n'
+    Return the list of flights in this format f'{index from 1 to length of flights}- ({flight_info['airline']}, {flight_info['flight_number']}, {flight_info['is_direct']}) Price: {flight_info['price']}, Departure: {flight_info['departure']}, Arrival: {flight_info['arrival']}\n'
 
     Args:
         source: IATA code for the source airport (e.g., "JFK").
@@ -154,6 +158,7 @@ def get_flights_data(source: str, destination: str, date: str, is_flights_direct
                 "arrival": datetime.fromisoformat(flight['itineraries'][0]['segments'][-1]['arrival']['at']).strftime("%d/%m/%Y %H:%M"),
                 "airline": flight['itineraries'][0]['segments'][0]['carrierCode'],
                 "flight_number": flight['itineraries'][0]['segments'][0]['number'],
+                "is_direct": False if len(flight['itineraries'][0]['segments']) > 1 else True,
                 "rating": calculate_rating(flight)  # Add rating
             }
             flights.append(flight_info)
