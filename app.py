@@ -154,8 +154,8 @@ def get_flights_data(source: str, destination: str, date: str, is_flights_direct
         for index, flight in enumerate(response.data):
             flight_info = {
                 "price": flight['price']['total'],
-                "departure": datetime.fromisoformat(flight['itineraries'][0]['segments'][0]['departure']['at']).strftime("%d/%m/%Y %H:%M"),
-                "arrival": datetime.fromisoformat(flight['itineraries'][0]['segments'][-1]['arrival']['at']).strftime("%d/%m/%Y %H:%M"),
+                "departure": datetime.fromisoformat(flight['itineraries'][0]['segments'][0]['departure']['at']).strftime("%d/%m/%Y (%H:%M)"),
+                "arrival": datetime.fromisoformat(flight['itineraries'][0]['segments'][-1]['arrival']['at']).strftime("%d/%m/%Y (%H:%M)"),
                 "airline": flight['itineraries'][0]['segments'][0]['carrierCode'],
                 "flight_number": flight['itineraries'][0]['segments'][0]['number'],
                 "is_direct": 'Not Direct' if len(flight['itineraries'][0]['segments']) > 1 else 'Direct',
