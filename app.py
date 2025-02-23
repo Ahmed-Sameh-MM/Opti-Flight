@@ -158,7 +158,7 @@ def get_flights_data(source: str, destination: str, date: str, is_flights_direct
                 "arrival": datetime.fromisoformat(flight['itineraries'][0]['segments'][-1]['arrival']['at']).strftime("%d/%m/%Y %H:%M"),
                 "airline": flight['itineraries'][0]['segments'][0]['carrierCode'],
                 "flight_number": flight['itineraries'][0]['segments'][0]['number'],
-                "is_direct": False if len(flight['itineraries'][0]['segments']) > 1 else True,
+                "is_direct": 'Not Direct' if len(flight['itineraries'][0]['segments']) > 1 else 'Direct',
                 "rating": calculate_rating(flight)  # Add rating
             }
             flights.append(flight_info)
