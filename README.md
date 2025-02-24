@@ -1,6 +1,6 @@
 ---
-title: First Agent Template
-emoji: ⚡
+title: Opti-Flight
+emoji: ✈️⚡
 colorFrom: pink
 colorTo: yellow
 sdk: gradio
