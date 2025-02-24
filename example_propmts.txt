@@ -1,0 +1,2 @@
+Prompt #1: List flights from Egypt airport to Germany airport, 1st of March 2025
+Prompt #2: List flights from Egypt airport to London airport, 1st of March 2025, make the price weight 5, duration weight 3, late arrival weight 5, non-direct weight 2
