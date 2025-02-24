@@ -1,20 +1,3 @@
----
-title: Opti-Flight
-emoji: ✈️⚡
-colorFrom: pink
-colorTo: yellow
-sdk: gradio
-sdk_version: 5.15.0
-app_file: app.py
-pinned: false
-tags:
-- smolagents
-- agent
-- smolagent
-- tool
-- agent-course
----
-  
 # ✈️ Opti-Flight – Your AI-Powered Flight Optimizer
 Opti-Flight is an AI-powered flight search agent that finds the best flights based on your personal preferences. Instead of simply sorting by price or duration, Opti-Flight allows users to assign custom weights to multiple factors, ensuring a tailored flight recommendation.
   
