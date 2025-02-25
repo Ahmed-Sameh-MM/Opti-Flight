@@ -1,3 +1,5 @@
+<img src="https://github.com/Ahmed-Sameh-MM/Opti-Flight/images/logo.png">
+
 # ✈️ Opti-Flight – Your AI-Powered Flight Optimizer
 Opti-Flight is an AI-powered flight search agent that finds the best flights based on your personal preferences. Instead of simply sorting by price or duration, Opti-Flight allows users to assign custom weights to multiple factors, ensuring a tailored flight recommendation.
   
