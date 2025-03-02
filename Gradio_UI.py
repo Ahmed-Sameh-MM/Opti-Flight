@@ -267,8 +267,9 @@ class GradioUI:
         ) as demo:
             gr.Markdown(
                 """
-                # Optimized Flights Search Agent
+                # Opti-Flight – Your AI-Powered Flight Optimizer ✈️⚡
                 I can help you find the best flights tailored to your preferences! Just tell me what matters most to you.
+                
                 Choose your weights for price, travel-time (flight duration), penalizing early-departure & late-arrival times, and penalizing Non-direct flights, and I’ll get you the best flight options tailored to your preferences.
                 """
             )
