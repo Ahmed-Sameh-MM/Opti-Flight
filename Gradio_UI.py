@@ -261,7 +261,17 @@ class GradioUI:
     def launch(self, **kwargs):
         import gradio as gr
 
-        with gr.Blocks(fill_height=True) as demo:
+        with gr.Blocks(
+            title="Opti-Flight – Your AI-Powered Flight Optimizer ✈️⚡",
+            fill_height=True,
+        ) as demo:
+            gr.Markdown(
+                """
+                # Optimized Flights Search Agent
+                I can help you find the best flights tailored to your preferences! Just tell me what matters most to you.
+                Choose your weights for price, travel-time (flight duration), penalizing early-departure & late-arrival times, and penalizing Non-direct flights, and I’ll get you the best flight options tailored to your preferences.
+                """
+            )
             stored_messages = gr.State([])
             file_uploads_log = gr.State([])
             chatbot = gr.Chatbot(
@@ -283,7 +293,19 @@ class GradioUI:
                     [upload_file, file_uploads_log],
                     [upload_status, file_uploads_log],
                 )
-            text_input = gr.Textbox(lines=1, label="Chat Message")
+            text_input = gr.Textbox(
+                label="Ask me about the best flights, optimized just for you ✈️",
+                placeholder="Type your trip details and preferences...",
+                # lines=1,
+            )
+            gr.Examples(
+                examples=[
+                    "List flights from Egypt airport to Germany airport, 1st of October 2025",
+                    "List flights from Egypt airport to London airport, 1st of March 2025, set the price weight to 5, the duration weight to 3, late-arrival penalty weight to 5 (heaviest penalty), non-direct flight penalty weight to 2",
+                ],
+                inputs=text_input,
+                label="Example Prompts"
+            )
             text_input.submit(
                 self.log_user_message,
                 [text_input, file_uploads_log],
